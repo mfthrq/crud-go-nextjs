@@ -12,7 +12,7 @@ export default function EditUserPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8080/users/${userId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`)
       .then((res) => res.json())
       .then((data) => setForm({ name: data.name, email: data.email }))
       .catch(() => setError("Gagal memuat data user"));
@@ -26,7 +26,7 @@ export default function EditUserPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:8080/users/${userId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

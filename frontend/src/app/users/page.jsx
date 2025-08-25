@@ -8,7 +8,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
 
   const fetchUsers = () => {
-    fetch("http://localhost:8080/users")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -30,7 +30,7 @@ export default function UsersPage() {
     if (!confirm) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/users/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
         method: "DELETE",
       });
 
