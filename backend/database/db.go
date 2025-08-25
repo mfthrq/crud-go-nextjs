@@ -1,16 +1,16 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var DB *sql.DB
+var DB *gorm.DB
 
 func Connect() {
 	// Load env file
@@ -25,18 +25,15 @@ func Connect() {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		host, user, password, dbname, port,
+	)
 
-	DB, err = sql.Open("postgres", connStr)
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Gagal konek ke database:", err)
+		log.Fatal("❌ Gagal konek ke database:", err)
 	}
 
-	err = DB.Ping()
-	if err != nil {
-		log.Fatal("Gagal ping ke database:", err)
-	}
-
-	fmt.Println("✅ Berhasil konek ke PostgreSQL!")
+	fmt.Println("✅ Berhasil konek ke PostgreSQL dengan GORM!")
 }

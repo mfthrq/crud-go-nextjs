@@ -2,42 +2,36 @@ package main
 
 import (
 	"backend/database"
+	"backend/models"
 	"backend/routes"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 )
 
 func main() {
+	// Koneksi DB
 	database.Connect()
+	database.DB.AutoMigrate(&models.User{})
 
+	// Router
 	r := mux.NewRouter()
 
-	// Definisikan route
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello dari Backend Go + PostgreSQL!")
-	}).Methods("GET")
-
+	// Routes user
 	r.HandleFunc("/users", routes.GetUsers).Methods("GET")
-	r.HandleFunc("/users", routes.CreateUser).Methods("POST")
 	r.HandleFunc("/users/{id}", routes.GetUserByID).Methods("GET")
+	r.HandleFunc("/users", routes.CreateUser).Methods("POST")
 	r.HandleFunc("/users/{id}", routes.UpdateUser).Methods("PUT")
 	r.HandleFunc("/users/{id}", routes.DeleteUser).Methods("DELETE")
 
-	// Tambahkan middleware CORS
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"}, // Metode yang diperbolehkan
-		AllowedHeaders: []string{"Content-Type"},                 // Header yang diperbolehkan
-	})
+	// Middleware CORS
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"}) // frontend Next.js
+	methodsOk := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 
-	// Gunakan CORS handler
-	handler := c.Handler(r)
-
-	// Jalankan server
-	fmt.Println("🚀 Server jalan di http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	fmt.Println("🚀 Server jalan di http://localhost:9090")
+	log.Fatal(http.ListenAndServe(":9090", handlers.CORS(originsOk, headersOk, methodsOk)(r)))
 }
